@@ -1,39 +1,54 @@
-const quoteText = document.querySelector(".quote"),
-quoteBtn = document.querySelector("button"),
-authorName = document.querySelector(".name"),
-speechBtn = document.querySelector(".speech"),
-copyBtn = document.querySelector(".copy"),
-twitterBtn = document.querySelector(".twitter"),
-synth = speechSynthesis;
+const text=document.getElementById("quote");
+const author=document.getElementById("author");
 
-function randomQuote(){
-    quoteBtn.classList.add("loading");
-    quoteBtn.innerText = "Loading Quote...";
-    fetch("https://api.forismatic.com/api/1.0/?").then(response => response.jsonp()).then(result => {
-        quoteText.innerText = result.content;
-        authorName.innerText = result.author;
-        quoteBtn.classList.remove("loading");
-        quoteBtn.innerText = "New Quote";
-    });
+
+
+const getNewQuote = async () =>
+{
+    //api for quotes
+    var url="https://type.fit/api/quotes";    
+
+    // fetch the data from api
+    const response=await fetch(url);
+    console.log(typeof response);
+    //convert response to json and store it in quotes array
+    const allQuotes = await response.json();
+
+    // Generates a random number between 0 and the length of the quotes array
+    const indx = Math.floor(Math.random()*allQuotes.length);
+
+    //Store the quote present at the randomly generated index
+    const quote=allQuotes[indx].text;
+    
+    //Store the author of the respective quote
+    const auth=allQuotes[indx].author;
+
+    if(auth==null)
+    {
+        author = "Anonymous";
+    }
+ 
+    //function to dynamically display the quote and the author
+    text.innerHTML=quote;
+    author.innerHTML="~ "+auth;
+    
 }
 
+copyBtn = document.querySelector(".copy"),
+copyBtn.addEventListener("click", ()=>{
+    navigator.clipboard.writeText(text.innerHTML);
+});
+
+speechBtn = document.querySelector(".speech"),
+synth = speechSynthesis;
 speechBtn.addEventListener("click", ()=>{
-    if(!quoteBtn.classList.contains("loading")){
-        let utterance = new SpeechSynthesisUtterance(`${quoteText.innerText} by ${authorName.innerText}`);
+    let utterance = new SpeechSynthesisUtterance(`${text.innerHTML} by ${author.innerHTML}`);
         synth.speak(utterance);
         setInterval(()=>{
             !synth.speaking ? speechBtn.classList.remove("active") : speechBtn.classList.add("active");
         }, 10);
-    }
+    
 });
 
-copyBtn.addEventListener("click", ()=>{
-    navigator.clipboard.writeText(quoteText.innerText);
-});
 
-twitterBtn.addEventListener("click", ()=>{
-    let tweetUrl = `https://twitter.com/intent/tweet?url=${quoteText.innerText}`;
-    window.open(tweetUrl, "_blank");
-});
-
-quoteBtn.addEventListener("click", randomQuote);
+getNewQuote();
