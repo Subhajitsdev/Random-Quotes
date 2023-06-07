@@ -30,7 +30,7 @@ const getNewQuote = async () =>
  
     //function to dynamically display the quote and the author
     text.innerHTML=quote;
-    author.innerHTML="~ "+auth;
+    author.innerHTML=auth;
     
 }
 
